@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="utf-8">
+    <title>common/NaughtsAndCrosses.js - Documentation</title>
+    
+    
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc.css">
+    <script src="scripts/nav.js" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav >
+    
+    <h2><a href="index.html">Home</a></h2><h3>Namespaces</h3><ul><li><a href="NaughtsAndCrosses.html">NaughtsAndCrosses</a><ul class='methods'><li data-type='method'><a href="NaughtsAndCrosses.html#.columns_unoccupied">columns_unoccupied</a></li><li data-type='method'><a href="NaughtsAndCrosses.html#.empty_board">empty_board</a></li><li data-type='method'><a href="NaughtsAndCrosses.html#.is_finished">is_finished</a></li><li data-type='method'><a href="NaughtsAndCrosses.html#.is_winning">is_winning</a></li><li data-type='method'><a href="NaughtsAndCrosses.html#.turn">turn</a></li><li data-type='method'><a href="NaughtsAndCrosses.html#.turn_of_player">turn_of_player</a></li></ul></li><li><a href="Stats4.html">Stats4</a><ul class='methods'><li data-type='method'><a href="Stats4.html#.get_statistics">get_statistics</a></li><li data-type='method'><a href="Stats4.html#.record_game">record_game</a></li></ul></li></ul>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">common/NaughtsAndCrosses.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import Ramda from ".../common/ramda.js";
+/**
+ * NaughtsAndCrosses.js is a game module to model "Naughts and Crosses".
+ * @namespace NaughtsAndCrosses
+ * @author Serena Sebastian
+ * @version 2022
+ */
+const NaughtsAndCrosses = Object.create(null);
+
+/**
+ * A Board is a square grid that symbolds can be placed on one at a time.
+ * Symbols fill up any empty position on the board.
+ * It is implemented as an array of columns of unoccupied slots.
+ * @memberof NaughtsAndCrosses
+ * @typedef {NaughtsAndCrosses.Symbol_or_unoccupied[][]} Board
+ */
+
+/**
+ * A symbol is either a naught or cross that players place in the grid.
+ * @memberof NaughtsAndCrosses
+ * @typedef {(1 | 2)} Symbol
+ */
+
+/**
+ * Either a symbol or an unoccupied slot.
+ * @memberof NaughtsAndCrosses
+ * @typedef {(NaughtsAndCrosses.Symbol| 0)} Symbol_or_unoccupied
+ */
+
+/**
+ * A series of symbol strings for {@link NaughtsAndCrosses.string_from_symbols}.
+ * @memberof NaughtsAndCrosses
+ * @enum {string[]}
+ * @property {string[]} original ["0", "1", "2"]
+ * Displays symbols by their index.
+ * @property {string[]} symbols ["⬛", "⭕", "❌"]
+ * Displays symbols as naughts and crosses.
+ */
+
+NaughtsAndCrosses.symbol_strings = Object.freeze({
+    "original": ["0", "1", "2"],
+    "symbols": ["⬛", "⭕", "❌"]
+});
+
+/**
+ * Forming a new empty board with specified dimensions.
+ * Or else returns a standard 3 x 3 board.
+ * @memberof NaughtsAndCrosses
+ * @function
+ * @param {number} [Board_width = 3] The width of the new board.
+ * @param {number} [Board_height = 3] The height of the new board.
+ */
+NaughtsAndCrosses.empty_board = function (Board_width = 3, Board_height = 3) {
+    return Ramda.repeat(Ramda.repeat(0, Board_height), Board_width);
+};
+
+/**
+ * Returns array of columns which are unoccupied to occupy a symbol.
+ * @memberof NaughtsAndCrosses
+ * @function
+ * @param {NaughtsAndCrosses.Board} board The board to check for free columns.
+ * @returns {number[][]} An array of column indices of free columns.
+ */
+NaughtsAndCrosses.columns_unoccupied = Ramda.pipe(
+    Ramda.addIndex(Ramda.map)((column, index) => (
+        Ramda.includes(0, column)
+        ? index
+        : -1
+    )),
+    Ramda.reject(Ramda.equals(-1))
+);
+
+NaughtsAndCrosses.rows_unoccupied = Ramda.pipe(
+    Ramda.addIndex(Ramda.map)((row, index) => (
+        Ramda.includes(0, row)
+        ? index
+        : -1
+    )),
+    Ramda.reject(Ramda.equals(-1))
+);
+// problem!! because this gives me free colums instead of all the free slots.
+// how can I manipulate this to give me all the free positions instead.
+
+/**
+ * Returns if the game has ended: either player winning or a draw
+ * A draw occurs when the board is full
+ * @memberof NaughtsAndCrosses
+ * @function
+ * @param {NaughtsAndCrosses.Board} board The board being tested.
+ * @returns {boolean} Returns whether game has finished or not.
+ */
+NaughtsAndCrosses.is_finished = function (board) {
+    return (
+        NaughtsAndCrosses.is_winning(1, board) ||
+        NaughtsAndCrosses.is_winning(2, board) ||
+        NaughtsAndCrosses.columns_unoccupied(board).length === 0 ||
+        NaughtsAndCrosses.rows_unoccupied(board).length === 0
+    );
+};
+
+const win_column = function (player_symbol) {
+    return function (column) {
+        return Ramda.includes(
+            [player_symbol, player_symbol, player_symbol],
+            Ramda.aperture(3, column)
+        );
+    };
+};
+
+const win_vertical = function (player_symbol, board) {
+    return Ramda.any(win_column(player_symbol), board);
+};
+
+const win_horizontal = function (player_symbol, board) {
+    return win_vertical(player_symbol, Ramda.transpose(board));
+};
+
+const stagger = function (board) {
+    const column_index = board.length;
+    return board.map(function (column, counter) {
+        return [
+            ...Ramda.repeat(0, counter),
+            ...column,
+            ...Ramda.repeat(0, column_index - 1 - counter)
+        ];
+    });
+};
+
+const other_stagger = Ramda.pipe(Ramda.reverse, stagger, Ramda.reverse);
+
+const win_positive_diagonal = function (player_symbol, board) {
+    return win_horizontal(player_symbol, other_stagger(board));
+};
+
+const win_negative_diagonal = function (player_symbol, board) {
+    return win_horizontal(player_symbol, stagger(board));
+};
+
+/**
+ * Returns if there has been a win.
+ * A win occurs if there are three symbols in a row.
+ * This could happen either horizontally, vertically, or diagonally.
+ * @memberof NaughtsAndCrosses
+ * @function
+ * @param {(1 | 2)} player_symbol Identifying which palyer won.
+ * @param {Connect4.Board} board The board.
+ * @returns {boolean} Returns if there is a win on board for the player.
+ */
+NaughtsAndCrosses.is_winning = function (player_symbol, board) {
+    return (
+        win_vertical(player_symbol, board) ||
+        win_horizontal(player_symbol, board) ||
+        win_positive_diagonal(player_symbol, board) ||
+        win_negative_diagonal(player_symbol, board)
+    );
+};
+
+/**
+ * Returns the player to have a turn next.
+ * @memberof NaughtsAndCrosses
+ * @function
+ * @param {NaughtsAndCrosses.Board} board The board.
+ * @returns {(1 | 2)} The next player to have a turn.
+ */
+NaughtsAndCrosses.turn_of_player = function (board) {
+    const flat_arrays = Ramda.flatten(board);
+    return (
+        Ramda.count(
+            Ramda.equals(1),
+            flat_arrays
+        ) === Ramda.count(
+            Ramda.equals(2),
+            flat_arrays
+        )
+        ? 1
+        : 2
+    );
+};
+
+/**
+ * A turn is a go played by the player.
+ * A new board is returned with the symbol placed by the player.
+ * @memberof NaughtsAndCrosses
+ * @function
+ * @param {NaughtsAndCrosses.Symbol} symbol The symbol which is added.
+ * @param {number} index_of_column The column the player adds the token to
+ * @param {NaughtsAndCrosses.Board} board The board that the turn is made on.
+ * @returns {(NaughtsAndCrosses.Board | undefined)} If the turn is allowed,
+ * return the new board, otherwise return `undefined`.
+ */
+NaughtsAndCrosses.turn = function (symbol, index_of_column, board) {
+    if (NaughtsAndCrosses.is_finished(board)) {
+        return undefined;
+    }
+    if (NaughtsAndCrosses.turn_of_player(board) !== symbol) {
+        return undefined;
+    }
+    const index_of_row = Ramda.indexOf(0, board[index_of_column]);
+    if (index_of_row === undefined) {
+        return undefined;
+    }
+    return Ramda.update(
+        index_of_column,
+        Ramda.update(index_of_row, symbol, board[index_of_column]),
+        board
+    );
+};
+
+// problem! retuns it to the column instead of the position
+// how do I change that?
+
+
+
+
+
+
+
+
+
+
+
+export default Object.freeze(NaughtsAndCrosses);
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+    
+    
+</div>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.10</a> on Wed Jun 08 2022 12:26:51 GMT+0100 (British Summer Time) using the <a href="https://github.com/clenemt/docdash">docdash</a> theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/polyfill.js"></script>
+<script src="scripts/linenumber.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!-- In HTML Comments are written like this -->
+<!-- They can all be removed for your apps -->
+<!doctype html> <!-- This first line tells browsers to expect modern standard html 5 -->
+<html lang="en-gb"> <!-- This is indicates the page is written in British English, useful for accessibility -->
+<meta charset="utf-8"> <!-- This indicates how the file is encoded. utf-8 is standard -->
+<title>Naughts & Crosses</title> <!-- All pages need a title, this will be displayed in the browser's title bar -->
+<link rel="stylesheet" href="default.css"> <!-- Import style sheet – default.css -->
+<link rel="icon" href="./assets/Naught.png"> <!-- Import 'Favorites Icon' – favicon.png -->
+<script type="module" src="main.js"></script> <!-- Load the main script. Must be type="module". Have only one of these -->
+
+<header>
+    <h1 id="title">Naughts & Crosses</h1>
+<a href="/docs/">API Documentation</a>
+</header>
+
+<main tabindex="-1">
+    <div id="game_board"></div>
+</main>
+
+<aside id="player_1" class="sidebar" aria-label="Player 1 Info">
+    <div class="player_turn">
+        <input id="player1_name" aria-label="Player 1 name" value="Player 1">
+        <div><strong>Elo</strong> <span id="p1_elo">100</span></div>
+    </div>
+    <div class="game_info">
+        <div id="Player1_type">Naughts</div>
+        <img id="player1_type_image" src="./assets/Naught.png" alt="Naught">
+        <div id="player1_waiting">Your go!</div>
+    </div>
+    <div class="statistics">
+        <table>
+            <tr>
+                <th role="none"></th>
+                <th scope="col">Win</th>
+                <th scope="col">Loss</th>
+                <th scope="col">Draw</th>
+            </tr>
+            <tr>
+                <th scope="row">Naughts</th>
+                <td id="p1_win">6</td>
+                <td id="p1_lose">1</td>
+                <td id="p1_draw">3</td>
+            </tr>
+        </table>
+        <div>
+            <strong>Current Streak</strong>
+            <span id="p1_streak">1</span>
+        </div>
+    </div>
+</aside>
+
+<aside id="player_2" class="sidebar" aria-label="Player 2 Info">
+    <div class="player_turn">
+        <input id="player2_name" aria-label="Player 2 name" value="Player 2">
+        <div><strong>Elo</strong> <span id="p2_elo">100</span></div>
+    </div>
+    <div class="game_info">
+        <div id="Player2_type">Crosses</div>
+        <img id="player2_type_image" src="./assets/Cross.png" alt="Cross">
+        <div id="p2_waiting">You're next</div>
+    </div>
+    <div class="statistics">
+        <table>
+            <tr>
+                <th role="none"></th>
+                <th scope="col">Win</th>
+                <th scope="col">Loss</th>
+                <th scope="col">Draw</th>
+            </tr>
+            <tr>
+                <th scope="row">Crosses</th>
+                <td id="p2_win">1</td>
+                <td id="p2_lose">3</td>
+                <td id="p2_draw">4</td>
+            </tr>
+        </table>
+        <div>
+            <strong>Current Streak</strong>
+            <span id="p2_streak">1</span>
+        </div>
+    </div>
+</aside>
+
+<dialog id="outcome_argument" tabindex="0" aria-label="Game over message">
+    <h2>Game Over</h2>
+    <div id="outcome_message">Naughts win!</div>
+    <div id="outcome_winner">Crosses win!</div>
+</dialog>
